@@ -20,6 +20,12 @@ class Shopify(scrapy.Spider):
         host_owner=main.css('td:nth-child(4)')
         country=main.css('td:nth-child(5)')
         city=main.css('td:nth-child(6)').getall()
+        rank=[]
+        for x in response.css('span.bold.arial.grey').getall():
+            if '#' in x:
+                rank.append(x)
+            else:
+                pass
         value=[]
         for x in city:
             if 'cities' in x:
@@ -32,6 +38,7 @@ class Shopify(scrapy.Spider):
                 'web_ip_addr':ip.css('a::text').getall()[i],
                 'web_host_comp':host_owner.css('a::text').getall()[i],
                 'web_host_country':country.css('a::text').getall()[i],
-                'web_host_city':value[i]
+                'web_host_city':value[i],
+                'World_Site_Popular_Rating':rank[i]
             }
         
