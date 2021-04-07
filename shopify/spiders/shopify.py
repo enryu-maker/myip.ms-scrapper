@@ -10,8 +10,8 @@ class Shopify(scrapy.Spider):
         'CONCURRENT_REQUESTS_PER_DOMAIN':1
     } 
     def __init__(self):
-        for i in range(1,10):
-            self.start_urls.append(f'https://myip.ms/browse/sites/{i}/own/376714')
+        #for i in range(1,10):
+        self.start_urls.append(f'https://myip.ms/browse/sites/1/own/376714')
       
     def parse(self, response):
         main=response.css('#sites_tbl')
@@ -21,7 +21,7 @@ class Shopify(scrapy.Spider):
         country=main.css('td:nth-child(5)')
         city=main.css('td:nth-child(6)').getall()
         rank=[]
-        for x in response.css('span.bold.arial.grey').getall():
+        for x in response.css('span.bold.arial.grey::text').getall():
             if '#' in x:
                 rank.append(x)
             else:
