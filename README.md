@@ -1,4 +1,4 @@
-<h2># webscrapper </h2>
+<h2># my-ip scraper </h2>
 <h2># website--https://myip.ms/</h2>
 <h3>IDEA Generation</h3>
 <p>As the SEO person requires the details about shop website ,Ip,ratings and etc</p>
