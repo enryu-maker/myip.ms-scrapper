@@ -7,6 +7,12 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+from scrapy.http import HtmlResponse
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class ShopifySpiderMiddleware:
@@ -101,3 +107,42 @@ class ShopifyDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class SeleniumMiddleware:
+    def __init__(self):
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        self.driver = webdriver.Chrome(options=chrome_options)
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        middleware = cls()
+        crawler.signals.connect(middleware.spider_closed,
+                                signal=signals.spider_closed)
+        return middleware
+
+    def process_request(self, request, spider):
+        self.driver.get(request.url)
+        try:
+            # Wait for the button to be clickable and click it
+            button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '//*[@id="captcha_submit"]'))
+            )
+            button.click()
+            # Wait for some time to ensure the page has loaded after the button click
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.XPATH, 'element_to_check_after_click'))
+            )
+        except Exception as e:
+            spider.logger.error(f"Error clicking button: {e}")
+
+        body = self.driver.page_source
+        return HtmlResponse(self.driver.current_url, body=body, encoding='utf-8', request=request)
+
+    def spider_closed(self):
+        self.driver.quit()
